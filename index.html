@@ -24,7 +24,9 @@
       padding: 30px;
       box-shadow: 0 0 40px rgba(128, 0, 255, 0.4);
       text-align: center;
-      transition: background 0.3s;
+      transition: all 0.3s ease;
+      opacity: 1;
+      transform: scale(1);
     }
 
     .avatar img {
@@ -64,6 +66,16 @@
       margin-top: 25px;
       margin-bottom: 10px;
       color: #69b8ff;
+      animation: glow 2s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+      0%, 100% {
+        text-shadow: 0 0 5px #69b8ff, 0 0 10px #69b8ff44;
+      }
+      50% {
+        text-shadow: 0 0 10px #69b8ff, 0 0 20px #69b8ff88;
+      }
     }
 
     .tags {
@@ -74,19 +86,37 @@
 
     .tag {
       padding: 8px 16px;
-      background: #1a1a22;
+      background: linear-gradient(135deg, #1a1a22, #202030);
       border-radius: 12px;
       font-size: 14px;
       border: 1px solid #262636;
-      transition: 0.25s;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
       cursor: pointer;
       transform: translateY(0);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tag::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(141, 43, 255, 0.4), transparent);
+      transition: left 0.6s;
+    }
+
+    .tag:hover::before {
+      left: 100%;
     }
 
     .tag:hover {
-      background: #272739;
-      transform: translateY(-4px) scale(1.05);
-      box-shadow: 0 0 12px #8d2bff55;
+      background: linear-gradient(135deg, #272739, #363650);
+      transform: translateY(-6px) scale(1.08) rotate(-2deg);
+      box-shadow: 0 8px 25px rgba(141, 43, 255, 0.6);
+      border-color: #8d2bff;
     }
 
     .tg-link {
@@ -107,20 +137,57 @@
     }
 
     .lang-switch button {
-      padding: 8px 14px;
+      padding: 12px 18px;
       border: none;
-      border-radius: 12px;
-      background: #22222f;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #22222f, #2a2a3f);
       color: white;
       cursor: pointer;
-      transition: 0.3s;
-      transform: translateY(0);
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      transform: translateY(0) scale(1);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .lang-switch button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(105, 184, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .lang-switch button:hover::before {
+      width: 200px;
+      height: 200px;
     }
 
     .lang-switch button:hover {
-      background: #36364a;
-      transform: translateY(-5px) scale(1.1) rotate(-2deg);
-      box-shadow: 0 0 15px #69b8ff66;
+      background: linear-gradient(135deg, #36364a, #4a4a6a);
+      transform: translateY(-8px) scale(1.15) rotate(5deg);
+      box-shadow: 0 12px 30px rgba(105, 184, 255, 0.5);
+    }
+
+    .lang-switch button:active {
+      transform: translateY(-4px) scale(1.05);
+    }
+
+    .flag {
+      font-size: 24px;
+      display: inline-block;
+      transition: transform 0.4s;
+      position: relative;
+      z-index: 1;
+    }
+
+    .lang-switch button:hover .flag {
+      transform: scale(1.3) rotate(360deg);
     }
   </style>
 </head>
@@ -137,27 +204,21 @@
     <div class="info-box">
       <p>🎂 <span class="age-title">Возраст</span>: <span class="age">14</span></p>
       <p>🌍 <span class="country-title">Страна</span>: <span class="country">Россия</span></p>
-      <p>
-        💬 Telegram:
-        <a class="tg-link" href="https://t.me/samyttg1" target="_blank">@samyttg1</a>
-      </p>
-    </div>
-
-    <h3 class="block-title">📁 Проекты</h3>
-
-    <div class="tags">
-      <a class="tg-link tag" href="https://t.me/samuscript" target="_blank">@samuscript</a>
     </div>
 
     <h3 class="block-title">🌐 Мои языки</h3>
 
     <div class="tags">
-      <div class="tag">C2 RU</div>
+      <div class="tag">C2 🇷🇺</div>
     </div>
 
     <div class="lang-switch">
-      <button onclick="setLang('ru')">RU</button>
-      <button onclick="setLang('en')">EN</button>
+      <button onclick="setLang('ru')" class="lang-btn">
+        <span class="flag">🇷🇺</span>
+      </button>
+      <button onclick="setLang('en')" class="lang-btn">
+        <span class="flag">🇺🇸</span>
+      </button>
     </div>
 
   </div>
@@ -168,20 +229,37 @@
     const country = document.querySelector(".country");
     const ageTitle = document.querySelector(".age-title");
     const countryTitle = document.querySelector(".country-title");
+    const blockTitle = document.querySelector(".block-title");
+    const langTag = document.querySelector(".tag");
 
     if (!age || !country || !ageTitle || !countryTitle) return;
 
-    if (code === "ru") {
-      age.innerText = "14";
-      country.innerText = "Россия";
-      ageTitle.innerText = "Возраст";
-      countryTitle.innerText = "Страна";
-    } else {
-      age.innerText = "14";
-      country.innerText = "Russia";
-      ageTitle.innerText = "Age";
-      countryTitle.innerText = "Country";
-    }
+    // Добавляем анимацию исчезновения
+    const card = document.querySelector(".card");
+    card.style.opacity = "0";
+    card.style.transform = "scale(0.95)";
+
+    setTimeout(() => {
+      if (code === "ru") {
+        age.innerText = "14";
+        country.innerText = "Россия";
+        ageTitle.innerText = "Возраст";
+        countryTitle.innerText = "Страна";
+        blockTitle.innerText = "🌐 Мои языки";
+        langTag.innerText = "C2 🇷🇺";
+      } else {
+        age.innerText = "14";
+        country.innerText = "Russia";
+        ageTitle.innerText = "Age";
+        countryTitle.innerText = "Country";
+        blockTitle.innerText = "🌐 My Languages";
+        langTag.innerText = "C2 🇺🇸";
+      }
+
+      // Возвращаем карточку с анимацией
+      card.style.opacity = "1";
+      card.style.transform = "scale(1)";
+    }, 200);
   }
 </script>
 
